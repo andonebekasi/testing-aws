@@ -9,7 +9,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 // Checkout your Terraform code repository
-                git 'https://github.com/andonebekasi/testing-aws.git'
+                git branch: 'main', credentialsId: 'your-credentials-id', url: 'https://github.com/andonebekasi/testing-aws.git'
             }
         }
 
