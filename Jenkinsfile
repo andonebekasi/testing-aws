@@ -1,54 +1,54 @@
 pipeline {
-    agent any
 
+    parameters {
+        booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
+    } 
     environment {
-        AWS_DEFAULT_REGION = 'us-east-1'
+        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
 
+   agent  any
     stages {
-        stage('Debug') {
+        stage('checkout') {
             steps {
-                // Add debugging information
-                sh 'git ls-remote -h origin'
-            }
-        }
-
-        stage('Checkout Code') {
-            steps {
-                // Checkout your Terraform code repository specifying the branch
-                git branch: 'main',  url: 'https://github.com/andonebekasi/testing-aws.git'
-            }
-        }
-
-        stage('Terraform Init') {
-            steps {
-                script {
-                    // Initialize Terraform in the workspace
-                    sh 'terraform init -input=false'
-                }
-            }
-        }
-
-        stage('Terraform Apply') {
-            steps {
-                script {
-                    // Apply the Terraform configuration to create the VPC
-                    sh 'terraform apply -auto-approve'
-                }
-            }
-        }
-    }
-
-    post {
-        always {
-            stage('Terraform Destroy (Cleanup)') {
-                steps {
-                    script {
-                        // Destroy the VPC (cleanup) after the job completes
-                        sh 'terraform destroy -auto-approve'
+                 script{
+                        dir("terraform")
+                        {
+                            git "https://github.com/andonebekasi/testing-aws.git"
+                        }
                     }
                 }
             }
+
+        stage('Plan') {
+            steps {
+                sh 'pwd;cd terraform/ ; terraform init'
+                sh "pwd;cd terraform/ ; terraform plan -out tfplan"
+                sh 'pwd;cd terraform/ ; terraform show -no-color tfplan > tfplan.txt'
+            }
+        }
+        stage('Approval') {
+           when {
+               not {
+                   equals expected: true, actual: params.autoApprove
+               }
+           }
+
+           steps {
+               script {
+                    def plan = readFile 'terraform/tfplan.txt'
+                    input message: "Do you want to apply the plan?",
+                    parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+               }
+           }
+       }
+
+        stage('Apply') {
+            steps {
+                sh "pwd;cd terraform/ ; terraform apply -input=false tfplan"
+            }
         }
     }
-}
+
+  }
