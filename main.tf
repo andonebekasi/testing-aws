@@ -87,7 +87,7 @@ resource "aws_eip" "jenkins_eip" {
 # Create an EC2 instance with Jenkins installed
 resource "aws_instance" "jenkins_instance" {
   ami           = "ami-0546bd5416f7138ed" # Jenkins ubuntu in us-east-1. Replace with the appropriate AMI for your region.
-  instance_type = "t2.micro"              # Change instance type as needed
+  instance_type = "t2.micro"              # Change instance type as needed #t2.medium buat jenkins
   key_name      = "andi"                  # Replace with the name of your key pair created on AWS
 
   vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
