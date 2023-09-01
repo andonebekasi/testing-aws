@@ -90,7 +90,7 @@ resource "aws_instance" "jenkins_instance" {
   instance_type = "t2.micro"              # Change instance type as needed #t2.medium buat jenkins
   key_name      = "andi"                  # Replace with the name of your key pair created on AWS
 
-  vpc_security_group_ids = [aws_security_group.jenkins_sg.id]
+  vpc_security_group_ids = [aws_security_group.jenkins1_sg.id]
   subnet_id              = aws_subnet.main.id
 
   tags = {
