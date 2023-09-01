@@ -6,10 +6,17 @@ pipeline {
     }
 
     stages {
+        stage('Debug') {
+            steps {
+                // Add debugging information
+                sh 'git ls-remote -h origin'
+            }
+        }
+
         stage('Checkout Code') {
             steps {
-                // Checkout your Terraform code repository
-                git branch: 'main', credentialsId: 'your-credentials-id', url: 'https://github.com/andonebekasi/testing-aws.git'
+                // Checkout your Terraform code repository specifying the branch
+                git branch: 'main',  url: 'https://github.com/andonebekasi/testing-aws.git'
             }
         }
 
